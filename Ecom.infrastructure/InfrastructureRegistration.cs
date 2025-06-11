@@ -1,5 +1,8 @@
 ﻿using Ecom.Core.Interfaces;
+using Ecom.infrastructure.Data;
 using Ecom.infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -11,16 +14,23 @@ namespace Ecom.infrastructure
 {
     public static class InfrastructureRegistration
     {
-        public static IServiceCollection InfratructureConfiguration(this IServiceCollection services)
+        public static IServiceCollection InfratructureConfiguration(this IServiceCollection services,IConfiguration configuration)
         {
-            // Register your DbContext, Repositories, and other infrastructure services here
-            // Example: services.AddDbContext<AppDbContext>(options => options.UseSqlServer("YourConnectionString"));
-            
+
             // services.AddScoped<IGenericRepositry<Category>, GenericRepositry<Category>>();
             // services.AddScoped<IGenericRepositry<Product>, GenericRepositry<Product>>();
             // services.AddScoped<IGenericRepositry<Photo>, GenericRepositry<Photo>>();
+
+            //services.AddScoped<ICategoryRepository, CategoryRepository>();
+            //services.AddScoped<IProductRepository, ProductRepository>();
+            //services.AddScoped<IPhotoRepository, PhotoRepository>();
             services.AddScoped(typeof(IGenericRepositry<>), typeof(GenericRepositry<>));
-            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IUnitOfWOrk, UnitOfWork>();
+            // apply DBCOntext
+            services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseSqlServer(configuration.GetConnectionString("EcomDatabase")); // Replace with your actual connection string
+            });
             return services;
         }
     }
