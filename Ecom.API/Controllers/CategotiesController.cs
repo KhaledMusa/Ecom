@@ -1,4 +1,6 @@
-﻿using Ecom.Core.DTO_s;
+﻿using AutoMapper;
+using Ecom.API.Helper;
+using Ecom.Core.DTO_s;
 using Ecom.Core.Entities.Product;
 using Ecom.Core.Interfaces;
 using Ecom.infrastructure.Repositories;
@@ -10,9 +12,10 @@ namespace Ecom.API.Controllers
 
     public class CategotiesController : BaseController
     {
-        public CategotiesController(IUnitOfWOrk work) : base(work)
+        public CategotiesController(IUnitOfWOrk work, IMapper mapper) : base(work, mapper)
         {
         }
+
         [HttpGet("Get-all-Category")]
         public async Task<IActionResult> GetAllCategories()
         {
@@ -54,11 +57,12 @@ namespace Ecom.API.Controllers
             try
             {
               
-                var category = new Category()
-                {
-                    Name = categoryDTO.Name,
-                    Description = categoryDTO.Description
-                };
+                //var category = new Category()
+                //{
+                //    Name = categoryDTO.Name,
+                //    Description = categoryDTO.Description
+                //};
+                var category = mapper.Map<Category>(categoryDTO);
                 await work.CategoryRepository.AddAsync(category);
                 return Ok(new { message = "Item has been Added" });
             }
@@ -74,18 +78,19 @@ namespace Ecom.API.Controllers
             try
             {
 
-                var category = new Category()
-                {
-                    Id = updateCategoryDTO.Id,
-                    Name = updateCategoryDTO.Name,
-                    Description = updateCategoryDTO.Description
-                };
+                //var category = new Category()
+                //{
+                //    Id = updateCategoryDTO.Id,
+                //    Name = updateCategoryDTO.Name,
+                //    Description = updateCategoryDTO.Description
+                //};
+                var category = mapper.Map<Category>(updateCategoryDTO);
                 await work.CategoryRepository.UpdateAsync(category);
-                return Ok(new { message= "Item has been Updated" });
+                return Ok(new ResponseAPI(200,"The Category Has been Updated"));// by using ResponseAPI class we can return the status code and message in a single object
             }
             catch(Exception ex)
             {
-                return BadRequest();
+                return BadRequest(new ResponseAPI(400));
             }
         }
         [HttpDelete("Delete-Category/{id}")]
@@ -98,7 +103,7 @@ namespace Ecom.API.Controllers
             }
             catch(Exception ex)
             {
-                return BadRequest();
+                return BadRequest(new ResponseAPI(400));
             }
         }
     }
