@@ -28,7 +28,7 @@ namespace Ecom.infrastructure
           );
 
             // ✅ يجب أن تكون Scoped وليس Singleton
-            services.AddScoped<IImageManageService, ImageManageService>();
+            services.AddSingleton<IImageManageService, ImageManageService>();
 
             // apply DBCOntext
             services.AddDbContext<AppDbContext>(options =>

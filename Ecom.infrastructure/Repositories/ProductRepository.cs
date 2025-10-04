@@ -5,6 +5,7 @@ using Ecom.Core.Interfaces;
 using Ecom.Core.Services;
 using Ecom.infrastructure.Data;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System;
 using System.Collections.Generic;
@@ -44,6 +45,29 @@ namespace Ecom.infrastructure.Repositories
             return true;
         }
 
-    
+        public async Task<bool> UpdateAsync(UpdateProductDTO updateProductDTO)
+        {
+            if(updateProductDTO is null) return false;
+            var findProduct = await context.Products.Include(x=>x.Category)
+                .Include(x=>x.Photos).FirstOrDefaultAsync(x=>x.Id == updateProductDTO.Id);
+            if (findProduct == null) return false;
+            mapper.Map(updateProductDTO, findProduct);
+            var photoNames = await context.Photos
+                .Where(x => x.ProductId == updateProductDTO.Id).ToListAsync();
+            foreach (var photo in photoNames)
+            {
+                imageManageService.DeleteImageAsync(photo.ImageName);
+            }
+            context.Photos.RemoveRange(photoNames);
+            var ImagePath = await imageManageService.AddImageAsync(updateProductDTO.Photo, updateProductDTO.Name);
+            var photos = ImagePath.Select(path => new Photo
+            {
+                ImageName = path,
+                ProductId = findProduct.Id
+            }).ToList();
+            await context.Photos.AddRangeAsync(photos);
+            await context.SaveChangesAsync();
+            return true;
+        }
     }
 }

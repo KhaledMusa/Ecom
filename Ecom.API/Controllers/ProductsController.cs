@@ -69,29 +69,19 @@ namespace Ecom.API.Controllers
                 return BadRequest(new ResponseAPI(500, ex.Message));
             }
         }
-        //[HttpPut("update-product/{id}")]
-        //public async Task<IActionResult> UpdateProduct(int id, UpdateProductDTO productDTO)
-        //{
-        //    try
-        //    {
-        //        if (productDTO == null || id != productDTO.Id)
-        //        {
-        //            return BadRequest(new ResponseAPI(400, "Invalid product data."));
-        //        }
-        //        var existingProduct = await work.ProductRepository.GetByIdAsync(id);
-        //        if (existingProduct == null)
-        //        {
-        //            return NotFound(new ResponseAPI(404, "Product not found."));
-        //        }
-        //        var updatedProduct = mapper.Map(productDTO, existingProduct);
-        //        await work.ProductRepository.UpdateAsync(updatedProduct);
-        //        return Ok(updatedProduct);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new ResponseAPI(500, ex.Message));
-        //    }
-        //}
+        [HttpPut("Update-Product/{id}")]
+        public async Task<IActionResult> UpdateProduct( UpdateProductDTO productDTO)
+        {
+            try
+            {
+              await  work.ProductRepository.UpdateAsync(productDTO);
+                return Ok(new ResponseAPI(200, "Product updated successfully."));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseAPI(500, ex.Message));
+            }
+        }
     }
 }
 
