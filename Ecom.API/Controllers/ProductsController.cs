@@ -69,13 +69,31 @@ namespace Ecom.API.Controllers
                 return BadRequest(new ResponseAPI(500, ex.Message));
             }
         }
-        [HttpPut("Update-Product/{id}")]
+        [HttpPut("Update-Product")]
         public async Task<IActionResult> UpdateProduct( UpdateProductDTO productDTO)
         {
             try
             {
               await  work.ProductRepository.UpdateAsync(productDTO);
                 return Ok(new ResponseAPI(200, "Product updated successfully."));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseAPI(500, ex.Message));
+            }
+        }
+        [HttpDelete("Delete-Product/{Id}")]
+        public async Task<IActionResult> DeleteProduct(int Id)
+        {
+            try
+            {
+                var product = await work.ProductRepository.GetByIdAsync(Id,x=>x.Photos, x => x.Category );
+                if (product == null)
+                {
+                    return NotFound(new ResponseAPI(404, "Product not found."));
+                }
+                await work.ProductRepository.DeleteAsync(product);
+                return Ok(new ResponseAPI(200, "Product deleted successfully."));
             }
             catch (Exception ex)
             {
