@@ -15,90 +15,60 @@ namespace Ecom.API.Controllers
         {
         }
         [HttpGet("get_all")]
-        public async Task<IActionResult> GetAllProducts()
+        public async Task<IActionResult> GetAllProducts([FromQuery] Ecom.Core.Specifications.ProductSpecParams productParams)
         {
-            try
-            {
-                var products = await work.ProductRepository.GetAllAsync(x=>x.Category, x => x.Photos);
-                var result = mapper.Map<List<ProductDTO>>(products);
-                if (products == null )
-                {
-                    return BadRequest(new ResponseAPI(400, "No products found."));
-                }
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var spec = new Ecom.Core.Specifications.ProductWithCategorySpecification(productParams);
+            var countSpec = new Ecom.Core.Specifications.ProductWithFiltersForCountSpecification(productParams);
+
+            var totalItems = await work.ProductRepository.CountAsync(countSpec);
+            var products = await work.ProductRepository.GetAllWithSpecAsync(spec);
+
+            var data = mapper.Map<IReadOnlyList<ProductDTO>>(products);
+
+            return Ok(new Pagination<ProductDTO>(productParams.PageIndex, productParams.PageSize, totalItems, data));
         }
         [HttpGet("get-by_ID/{id}")]
         public async Task<IActionResult> GetProductById(int id)
         {
-            try
+            var spec = new Ecom.Core.Specifications.ProductWithCategorySpecification(id);
+            var product = await work.ProductRepository.GetEntityWithSpec(spec);
+            
+            if (product == null)
             {
-                var product = await work.ProductRepository.GetByIdAsync(id,x=>x.Category,X=>X.Photos);
-                var result = mapper.Map<ProductDTO>(product);
-                if (product == null)
-                {
-                    return NotFound(new ResponseAPI(404, "Product not found."));
-                }
-                return Ok(result);
+                return NotFound(new ResponseAPI(404, "Product not found."));
             }
-            catch (Exception ex)
-            {
-                return BadRequest(new ResponseAPI(400, "No products found."));
-            }
+
+            var result = mapper.Map<ProductDTO>(product);
+            return Ok(result);
         }
         [HttpPost("add-product")]
         public async Task<IActionResult> AddProduct(AddProductDTO addproductDTO)
         {
-            try
+            if (addproductDTO == null)
             {
-                if (addproductDTO == null)
-                {
-                    return BadRequest(new ResponseAPI(400, "Invalid product data."));
-                }
+                return BadRequest(new ResponseAPI(400, "Invalid product data."));
+            }
 
-                //var product = mapper.Map<Product>(addproductDTO);
-                await work.ProductRepository.AddAsync(addproductDTO);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new ResponseAPI(500, ex.Message));
-            }
+            //var product = mapper.Map<Product>(addproductDTO);
+            await work.ProductRepository.AddAsync(addproductDTO);
+            return Ok();
         }
         [HttpPut("Update-Product")]
         public async Task<IActionResult> UpdateProduct( UpdateProductDTO productDTO)
         {
-            try
-            {
-              await  work.ProductRepository.UpdateAsync(productDTO);
-                return Ok(new ResponseAPI(200, "Product updated successfully."));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new ResponseAPI(500, ex.Message));
-            }
+            await  work.ProductRepository.UpdateAsync(productDTO);
+            return Ok(new ResponseAPI(200, "Product updated successfully."));
         }
         [HttpDelete("Delete-Product/{Id}")]
         public async Task<IActionResult> DeleteProduct(int Id)
         {
-            try
+            var product = await work.ProductRepository.GetByIdAsync(Id,x=>x.Photos, x => x.Category );
+            if (product == null)
             {
-                var product = await work.ProductRepository.GetByIdAsync(Id,x=>x.Photos, x => x.Category );
-                if (product == null)
-                {
-                    return NotFound(new ResponseAPI(404, "Product not found."));
-                }
-                await work.ProductRepository.DeleteAsync(product);
-                return Ok(new ResponseAPI(200, "Product deleted successfully."));
+                return NotFound(new ResponseAPI(404, "Product not found."));
             }
-            catch (Exception ex)
-            {
-                return BadRequest(new ResponseAPI(500, ex.Message));
-            }
+            await work.ProductRepository.DeleteAsync(product);
+            return Ok(new ResponseAPI(200, "Product deleted successfully."));
         }
     }
 }

@@ -11,5 +11,7 @@ namespace Ecom.Core.Interfaces
         public ICategoryRepository CategoryRepository { get; }
         public IProductRepository ProductRepository { get;  }
         public IPhotoRepository PhotoRepository { get;  }
+        IGenericRepositry<TEntity> Repositry<TEntity>() where TEntity : class;
+        Task<int> Complete();
     }
 }
