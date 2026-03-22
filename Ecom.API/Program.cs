@@ -18,7 +18,7 @@ namespace Ecom.API
             // Add services to the container.
             builder.Services.AddMemoryCache();
             builder.Services.AddControllers();
-            
+
             // Add FluentValidation
             builder.Services.AddFluentValidationAutoValidation();
             builder.Services.AddFluentValidationClientsideAdapters();
@@ -46,7 +46,7 @@ namespace Ecom.API
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            app.UseMiddleware<ExceptionMiddleware>();
+            app.UseMiddleware<ExceptionsMiddleware>();
 
             if (app.Environment.IsDevelopment())
             {

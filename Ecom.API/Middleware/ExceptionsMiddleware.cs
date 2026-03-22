@@ -2,20 +2,19 @@
 using Microsoft.Extensions.Caching.Memory;
 using System.Net;
 using System.Text.Json;
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace Ecom.API.Middleware
 {
     public class ExceptionsMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly IHostingEnvironment _environment;
+        private readonly IHostEnvironment _env;
         private readonly IMemoryCache _memoryCache;
         private readonly TimeSpan _rateLimitWindow = TimeSpan.FromSeconds(30);
-        public ExceptionsMiddleware(RequestDelegate next, IHostingEnvironment environment, IMemoryCache memoryCache)
+        public ExceptionsMiddleware(RequestDelegate next, IHostEnvironment environment, IMemoryCache memoryCache)
         {
             _next = next;
-            _environment = environment;
+            _env = environment;
             _memoryCache = memoryCache;
         }
         public async Task InvokeAsync(HttpContext context)
@@ -38,7 +37,7 @@ namespace Ecom.API.Middleware
 
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 context.Response.ContentType = "application/json";
-                var response = _environment.IsDevelopment() ?
+                var response = _env.IsDevelopment() ?
                     new ApiExceptions((int)HttpStatusCode.InternalServerError, ex.Message, ex.StackTrace)
                     : new ApiExceptions((int)HttpStatusCode.InternalServerError, ex.Message);
                 var json = JsonSerializer.Serialize(response);
