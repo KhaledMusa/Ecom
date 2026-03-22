@@ -16,5 +16,8 @@ namespace Ecom.Core.Interfaces
         Task AddAsync(T entity);
         Task UpdateAsync(T entity);
         Task DeleteAsync(int id);
+        Task<IReadOnlyList<T>> GetAllWithSpecAsync(ISpecification<T> spec);
+        Task<T> GetEntityWithSpec(ISpecification<T> spec);
+        Task<int> CountAsync(ISpecification<T> spec);
     }
 }
